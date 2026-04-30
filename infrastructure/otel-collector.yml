@@ -1,0 +1,41 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 1000
+
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+
+  # Uncomment during Experiment 03 to see the effect
+  # cumulativetodelta:
+  #   include:
+  #     match_type: regexp
+  #     metrics: [".+"]
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: "otel"              # adds otel_ prefix to all metric names
+
+  debug:
+    verbosity: detailed            # logs every metric to stdout — useful for debugging
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus, debug]
+
+  telemetry:
+    metrics:
+      address: 0.0.0.0:8888       # Collector's own metrics endpoint

@@ -1,0 +1,17 @@
+otel-prometheus-playground.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# macOS
+.DS_Store
+
+# Editor
+.idea/
+*.swp
+
