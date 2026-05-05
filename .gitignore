@@ -13,6 +13,5 @@ venv/
 
 # Editor
 .idea/
-*.swp
-
+*.swpotel-prometheus-playground.code-workspace
 otel-prometheus-playground.code-workspace

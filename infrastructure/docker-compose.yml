@@ -1,4 +1,5 @@
 version: '3.8'
+name: otel-prom-playground
 
 services:
 
@@ -38,7 +39,7 @@ services:
     ports:
       - "4317:4317"    # OTLP gRPC receiver
       - "4318:4318"    # OTLP HTTP receiver
-      - "8888:8888"    # Collector's own internal metrics
+      - "18888:8888"   # Collector's own internal metrics
       - "8889:8889"    # Prometheus exporter (scraped by Prometheus)
     volumes:
       - ./otel-collector.yml:/etc/otelcol-contrib/config.yaml
