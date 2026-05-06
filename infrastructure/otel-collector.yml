@@ -16,15 +16,15 @@ processors:
     limit_mib: 512
 
   # Uncomment during Experiment 03 to see the effect
-  # cumulativetodelta:
-  #   include:
-  #     match_type: regexp
-  #     metrics: [".+"]
+  cumulativetodelta:
+     include:
+       match_type: regexp
+       metrics: [".+"]
 
 exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
-    namespace: "otel"              # adds otel_ prefix to all metric names
+    namespace: "otel2"              # adds otel_ prefix to all metric names
 
   debug:
     verbosity: detailed            # logs every metric to stdout — useful for debugging
