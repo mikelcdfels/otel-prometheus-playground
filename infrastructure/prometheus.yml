@@ -2,6 +2,14 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+rule_files:
+  - 'prometheus-rules.yml'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
 scrape_configs:
 
   # OTel Collector Prometheus exporter — metrics sent via OTLP
@@ -24,4 +32,31 @@ scrape_configs:
   - job_name: 'histogram-experiment'
     static_configs:
       - targets: ['host.docker.internal:8001']
+    scrape_interval: 5s
+
+  # Experiment 05 — cardinality explosion
+  - job_name: 'cardinality-experiment'
+    static_configs:
+      - targets: ['host.docker.internal:8002']
+    scrape_interval: 5s
+
+  # Experiment 06 — multi-instance aggregation (3 instances)
+  - job_name: 'multi-instance'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8010'
+          - 'host.docker.internal:8011'
+          - 'host.docker.internal:8012'
+    scrape_interval: 5s
+
+  # Experiment 08 — recording rules source metrics
+  - job_name: 'recording-rules-experiment'
+    static_configs:
+      - targets: ['host.docker.internal:8003']
+    scrape_interval: 5s
+
+  # Experiment 09 — alertmanager (shares metric names with experiment 08)
+  - job_name: 'alertmanager-experiment'
+    static_configs:
+      - targets: ['host.docker.internal:8004']
     scrape_interval: 5s

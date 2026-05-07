@@ -18,7 +18,7 @@ reader = PeriodicExportingMetricReader(
 
 provider = MeterProvider(metric_readers=[reader])
 metrics.set_meter_provider(provider)
-meter = metrics.get_meter('dash0.study', version='1.0.0')
+meter = metrics.get_meter('otel.playground', version='1.0.0')
 
 # OTel instruments — note: dot notation, not underscores
 request_counter = meter.create_counter(

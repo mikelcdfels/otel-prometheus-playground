@@ -1,0 +1,35 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'endpoint']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: 'webhook-logger'
+
+  routes:
+    - matchers:
+        - severity = critical
+      receiver: 'webhook-logger'
+      continue: false
+
+receivers:
+  # Logs all alerts to a local HTTP server — great for local experiments.
+  # Run: python3 -m http.server 5001  (from any terminal)
+  # Then trigger an alert and watch the POST requests arrive.
+  - name: 'webhook-logger'
+    webhook_configs:
+      - url: 'http://host.docker.internal:5001/alert'
+        send_resolved: true
+
+# Inhibition: if a critical alert fires for an endpoint,
+# suppress warnings for the same endpoint — avoid duplicate pages for the same root cause.
+inhibit_rules:
+  - source_matchers:
+      - alertname = HighErrorRate
+      - severity = critical
+    target_matchers:
+      - alertname = HighP99Latency
+      - severity = warning
+    equal: ['endpoint']

@@ -1,0 +1,55 @@
+groups:
+  - name: recording_rules
+    interval: 15s
+    rules:
+
+      # Pre-compute the per-bucket rate summed by endpoint
+      # Used as input to histogram_quantile() in dashboards.
+      # Instead of scanning all raw bucket series at query time,
+      # dashboards read these pre-aggregated series directly.
+      - record: job:svc_request_duration:rate5m
+        expr: |
+          sum by (le, endpoint) (
+            rate(svc_request_duration_seconds_bucket[5m])
+          )
+
+      # Pre-compute total request rate per endpoint and status
+      - record: job:svc_requests:rate5m
+        expr: |
+          sum by (endpoint, status) (
+            rate(svc_requests_total[5m])
+          )
+
+      # Pre-compute error ratio per endpoint
+      # Ready to alert on without any further computation
+      - record: job:svc_error_rate:rate5m
+        expr: |
+          sum by (endpoint) (rate(svc_requests_total{status="500"}[5m]))
+          /
+          sum by (endpoint) (rate(svc_requests_total[5m]))
+
+  - name: alerting_rules
+    rules:
+
+      # Alert when p99 latency exceeds 1s for more than 2 minutes
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            sum by (le, endpoint) (job:svc_request_duration:rate5m)
+          ) > 1.0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p99 latency on {{ $labels.endpoint }}"
+          description: "p99 latency is {{ $value | humanizeDuration }} (threshold: 1s)"
+
+      # Alert when error rate exceeds 5% for more than 1 minute
+      - alert: HighErrorRate
+        expr: job:svc_error_rate:rate5m > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.endpoint }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"

@@ -20,7 +20,7 @@ Date: · Time spent: min
 **What was hard to understand and why:**
 →
 
-**Open question for Michele:**
+**Open question:**
 →
 
 ---
@@ -41,7 +41,7 @@ Date: · Time spent: min
 **What was hard to understand and why:**
 →
 
-**Open question for Michele:**
+**Open question:**
 →
 
 ---
@@ -62,7 +62,7 @@ Date: · Time spent: min
 **What was hard to understand and why:**
 →
 
-**Open question for Michele:**
+**Open question:**
 →
 
 ---
@@ -83,7 +83,7 @@ Date: · Time spent: min
 **What was hard to understand and why:**
 →
 
-**Open question for Michele:**
+**Open question:**
 →
 
 ---
@@ -104,7 +104,7 @@ Date: · Time spent: min
 **What was hard to understand and why:**
 →
 
-**Open question for Michele:**
+**Open question:**
 →
 
 ---
@@ -125,7 +125,7 @@ Date: · Time spent: min
 **What was hard to understand and why:**
 →
 
-**Open question for Michele:**
+**Open question:**
 →
 
 ---
@@ -146,12 +146,12 @@ Date: · Time spent: min
 **What was hard to understand and why:**
 →
 
-**Open question for Michele:**
+**Open question:**
 →
 
 ---
 
-## Note 08: Open Questions for Michele
+## Note 08: Open Questions
 
 - 
 - 
