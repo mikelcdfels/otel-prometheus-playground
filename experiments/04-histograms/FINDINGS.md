@@ -6,7 +6,9 @@
 
 ## What surprised me
 
-<!-- e.g. bad_buckets reports p99=10s when the true p99 is ~2s -->
+The three histograms receive identical data but report p99 ≈ 1.9s, ≈ 2.3s, and ≈ 8.7s. The difference is purely bucket width at the point where p99 falls — the bad histogram has a [1.0, 10.0] bucket 9 seconds wide, so linear interpolation produces a completely wrong result. The problem is circular: to design good buckets you need to know your distribution, but you don't know your distribution until you have production data
+
+If you don't know your distribution upfront, Native Histograms (Exponential Histograms in OTel) are the answer — buckets are generated automatically based on incoming values, no manual definition needed. 
 
 ## Open questions
 
