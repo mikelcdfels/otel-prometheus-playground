@@ -87,9 +87,10 @@ request_duration_hist = Histogram(
 )
 
 # Summary — pre-computes quantiles in the app → CANNOT be merged
-request_duration_sum = Summary(
+request_summary = Summary(
     'svc_request_summary',
-    'Request duration (Summary) — quantiles computed in-process, cannot aggregate'
+    'Request duration',
+    ['instance']
 )
 
 requests_total = Counter(
@@ -116,7 +117,7 @@ def simulate():
     while True:
         duration = max(0.001, random.lognormvariate(MU, SIGMA))
         request_duration_hist.observe(duration)
-        request_duration_sum.observe(duration)
+        request_summary.labels(instance=str(PORT)).observe(duration)
         requests_total.inc()
         time.sleep(0.05)   # ~20 req/s per instance → ~60 req/s fleet total
 
