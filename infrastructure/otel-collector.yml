@@ -38,25 +38,20 @@ processors:
     metric_statements:
       - context: metric
         statements:
-          # Rename legacy metric to canonical name
           - set(name, "app.requests.total") where name == "app.legacy.counter"
-    datapoint_statements:
       - context: datapoint
         statements:
-          # Add cluster label to every data point (enrichment)
           - set(attributes["cluster"], "eu-prod")
-          # PII scrubbing — delete before data leaves the collector
           - delete_key(attributes, "user.email")
           - delete_key(attributes, "user.name")
           - delete_key(attributes, "user.phone")
-          # Truncate all attribute string values to 256 chars
-          # (prevents cardinality explosion from long error messages)
           - truncate_all(attributes, 256)
 
 exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
     namespace: "otel"              # adds otel_ prefix to all metric names
+    enable_open_metrics: true   
 
   debug:
     verbosity: detailed            # logs every metric to stdout — useful for debugging
@@ -66,7 +61,14 @@ service:
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, filter/drop-debug, filter/drop-test, transform/enrich-and-clean, batch]
+      #processors: [memory_limiter, batch]
+
       exporters: [prometheus, debug]
+
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug]
 
   telemetry:
     metrics:

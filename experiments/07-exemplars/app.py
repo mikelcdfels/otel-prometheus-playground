@@ -70,6 +70,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.trace.sampling import TraceIdRatioBased
+from opentelemetry.sdk.metrics._internal.exemplar import TraceBasedExemplarFilter
 
 # ------------------------------------------------------------------
 # Tracing setup
@@ -94,7 +95,14 @@ tracer = trace.get_tracer('experiment.07.exemplars')
 # ------------------------------------------------------------------
 exporter = OTLPMetricExporter(endpoint='http://localhost:4317', insecure=True)
 reader   = PeriodicExportingMetricReader(exporter, export_interval_millis=5000)
-provider = MeterProvider(metric_readers=[reader])
+
+#provider = MeterProvider(metric_readers=[reader])
+# MODIFICACIÓN AQUÍ: Añadimos el exemplar_filter
+provider = MeterProvider(
+    metric_readers=[reader],
+    exemplar_filter=TraceBasedExemplarFilter()
+)
+
 metrics.set_meter_provider(provider)
 meter = metrics.get_meter('experiment.07', version='1.0.0')
 

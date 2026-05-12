@@ -16,6 +16,7 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.enable-remote-write-receiver'
       - '--web.enable-lifecycle'           # enables config reload via POST
+      - '--enable-feature=exemplar-storage'  
     restart: unless-stopped
 
   grafana:
