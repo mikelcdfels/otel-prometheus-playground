@@ -1,158 +1,173 @@
 # Learning Notes
 
-One note per concept. Format: what I knew → what I learned → what was hard → open question.
+---
+
+## Experiment 01 — Metric Types
+
+Introduces the four core Prometheus metric types and explores how each behaves under different query functions.
+
+**Findings:**
+
+#### Standard histograms accuracy highly depends on how buckets are defined
+
+Non-exact results: In Prometheus, histogram_quantile is just a "best guess". It doesn't store the exact latency of every request.
+
+Linear Interpolation: When a quantile (like P99) falls between two buckets, Prometheus assumes the data is spread out evenly and "draws a straight line" to estimate the value. This is linear interpolation.
+
+Because it's an estimation, if your buckets are too wide, the result is quite fake. You aren't seeing reality, just a math approximation.
+
+#### Don't use rates with gauges
+
+Never use rate() with a Gauge like active_connections or cpu_usage because it is a technical error that creates "fake spikes" in your data; since Gauges naturally go up and down, rate mistakenly treats every drop as a counter reset.
+Instead, you should use functions like avg_over_time or max_over_time.
+
+#### Differences between summaries and histograms
+
+The main difference is where the math happens: in a Summary, the application calculates the percentiles before sending them, while in a Histogram, the app sends raw data in "buckets" and the database (Prometheus, Clickhouse) calculates the percentiles later.
+
+Histograms are superior because they are aggregatable, meaning you can combine data from multiple pods to see global performance, whereas Summaries are rigid and impossible to merge accurately.
+
+While Summaries require you to define percentiles in the code, Histograms give you the flexibility to query any value after the data is collected.
+
+→ Steps are documented in [experiments/01-metric-types/app.py](experiments/01-metric-types/app.py)
 
 ---
 
-## Note 01: Counter vs Gauge
+## Experiment 02 — Counter Reset
 
-Date: · Time spent: min
+Observes how Prometheus handles counter resets caused by process restarts, and how rate() automatically recovers without manual intervention.
 
-**What I already knew:**
-→
+**Findings:**
 
-**What I didn't know / was wrong about:**
-→
+Prometheus handles counter resets automatically within the rate() function to prevent negative or distorted values; it achieves this by detecting when a counter's current value is lower than the previous one and effectively "ignoring" the first data point after the reset to avoid calculating a false delta. 
 
-**Experiment I ran:**
-→
+This logic mirrors the architectural contribution made by NR during the development of the Cumulative-to-Delta processor in OpenTelemetry, where the first delta after a reset is discarded to ensure data integrity.
+https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/18298
 
-**What was hard to understand and why:**
-→
-
-**Open question:**
-→
+→ Steps are documented in [experiments/02-counter-reset/app.py](experiments/02-counter-reset/app.py)
 
 ---
 
-## Note 02: Histogram Buckets — Cumulative Semantics
+## Experiment 03 — OTel Collector
 
-Date: · Time spent: min
+Traces the full metric pipeline from OTel SDK through the Collector to Prometheus and shows why cumulativetodelta is a no-op with a Prometheus backend.
 
-**What I already knew:**
-→
+**Findings:**
 
-**What I didn't know / was wrong about:**
-→
+#### Prometheus exporter namespace configuration
 
-**Experiment I ran:**
-→
+The Prometheus exporter in the OTel Collector accepts a namespace parameter that prepends a prefix to every metric name served at the /metrics endpoint. This is useful to avoid name collisions when multiple sources are scraped by the same Prometheus instance.
 
-**What was hard to understand and why:**
-→
+#### Cumulativetodelta is pointless when the exporter is Prometheus
 
-**Open question:**
-→
+The cumulativetodelta processor has no observable effect when the pipeline terminates in a Prometheus exporter, because Prometheus requires counters to always increase and the exporter re-accumulates the deltas back into cumulative values before serving them. 
 
----
+The processor only has value when the destination is a delta-native backend like ClickHouse, where deltas can be stored and queried directly without subtraction or reset detection logic.
 
-## Note 03: histogram_quantile() — Why rate() Must Be Inside It
-
-Date: · Time spent: min
-
-**What I already knew:**
-→
-
-**What I didn't know / was wrong about:**
-→
-
-**Experiment I ran:**
-→
-
-**What was hard to understand and why:**
-→
-
-**Open question:**
-→
+→ Steps are documented in [experiments/03-otel-collector/app.py](experiments/03-otel-collector/app.py)
 
 ---
 
-## Note 04: Summary Limitations — Cannot Aggregate Across Instances
+## Experiment 04 — Histograms
 
-Date: · Time spent: min
+Compares three histograms with different bucket configurations on identical traffic to show how bucket design directly determines p99 accuracy.
 
-**What I already knew:**
-→
+**Findings:**
 
-**What I didn't know / was wrong about:**
-→
+The three histograms receive identical data but report p99 ≈ 1.9s, ≈ 2.3s, and ≈ 8.7s. The difference is purely bucket width at the point where p99 falls — the bad histogram has a [1.0, 10.0] bucket 9 seconds wide, so linear interpolation produces a completely wrong result. 
 
-**Experiment I ran:**
-→
+The problem is circular: to design good buckets you need to know your distribution, but you don't know your distribution until you have production data.
 
-**What was hard to understand and why:**
-→
+If you don't know your distribution upfront, Native Histograms (Exponential Histograms in OTel) are the answer — buckets are generated automatically based on incoming values, no manual definition needed.
 
-**Open question:**
-→
+While Prometheus is limited to Cumulative Histograms, Dash0 optimizes performance by storing metrics as Deltas in ClickHouse, replacing expensive "end-minus-start" calculations with simple, high-speed additions. This approach eliminates "counter reset" errors during pod restarts and allows us to leverage native OpenTelemetry Delta Temporality to offload backend processing, directly reducing infrastructure costs while accelerating dashboard load times.
+
+→ Steps are documented in [experiments/04-histograms/app.py](experiments/04-histograms/app.py)
 
 ---
 
-## Note 05: Temporality — Cumulative vs Delta, The Reset Problem
+## Experiment 05 — Cardinality
 
-Date: · Time spent: min
+Shows how high-cardinality labels cause series explosion and how to fix it through label transformation rather than outright removal.
 
-**What I already knew:**
-→
+**Findings:**
 
-**What I didn't know / was wrong about:**
-→
+#### Reducing cardinality: transform labels, don't just drop them
 
-**Experiment I ran:**
-→
+Dropping user_id entirely works but loses potentially useful information. A better approach is replacing it with a lower-cardinality equivalent — for example, user_type (free, pro, enterprise) instead of user_id (1 million values). Same business insight, 99.9% less cardinality.
 
-**What was hard to understand and why:**
-→
-
-**Open question:**
-→
+→ Steps are documented in [experiments/05-cardinality/app.py](experiments/05-cardinality/app.py)
 
 ---
 
-## Note 06: OTel → Prometheus Naming Transforms in the Collector
+## Experiment 06 — Multi-Instance Aggregation
 
-Date: · Time spent: min
+Proves that Histograms aggregate correctly across instances while Summaries do not, and shows why sum by(le) before histogram_quantile is mandatory.
 
-**What I already knew:**
-→
+**Findings:**
 
-**What I didn't know / was wrong about:**
-→
+#### sum by(le) is mandatory for correct global percentiles across multiple instances
 
-**Experiment I ran:**
-→
+Without sum by(le), Prometheus evaluates each instance's buckets independently — the 0.99 position falls in a different bucket for each pod, producing a separate and incomparable p99 per instance rather than a single global value. sum by(le) merges all bucket counts first, so the percentile is computed once over the combined traffic.
 
-**What was hard to understand and why:**
-→
+#### Summary returns a value, Histogram returns counts — that difference determines aggregability
 
-**Open question:**
-→
+Summary computes the quantile inside the process and exposes the result directly — a single value like {quantile="0.99"} 0.487. That value cannot be combined with other instances because percentiles are not mathematically summable. Histogram exposes cumulative bucket counts instead — bucket[le="0.5"] 890 — and counts are summable: adding bucket counts across pods produces a valid combined distribution that Prometheus can interpolate over to compute the correct global p99. The information needed for the calculation is never destroyed.
+
+→ Steps are documented in [experiments/06-multi-instance/app.py](experiments/06-multi-instance/app.py)
 
 ---
 
-## Note 07: Explicit vs Exponential Histogram — Precision Difference
+## Experiment 07 — Exemplars
 
-Date: · Time spent: min
+Attaches real trace IDs to histogram observations so a latency spike in Prometheus can be clicked through directly to the corresponding trace.
 
-**What I already knew:**
-→
+**Findings:**
 
-**What I didn't know / was wrong about:**
-→
+Standard Prometheus text format does not support Exemplars. 
+To expose them, the OTel Collector must be explicitly configured with enable_open_metrics: true and the scraping client (or curl) must use the application/openmetrics-text header. Without this specific content negotiation, exemplars are silently dropped during the scrape, breaking the link between metrics and traces.
 
-**Experiment I ran:**
-→
+Exemplars are not captured by default in many SDKs (like Python) to save memory. 
 
-**What was hard to understand and why:**
-→
+Exemplars are usually related to Histogram metrics, they also are useful with counters but doesn't make sense with Gauges.
 
-**Open question:**
-→
+→ Steps are documented in [experiments/07-exemplars/app.py](experiments/07-exemplars/app.py)
 
 ---
 
-## Note 08: Open Questions
+## Experiment 08 — Recording Rules
 
-- 
-- 
-- 
+Demonstrates how recording rules pre-compute expensive aggregations at write time, making dashboard and alert queries instant.
+
+**Findings:**
+
+#### Recording rules pre-compute expensive queries; ClickHouse uses materialized views for the same purpose
+
+Recording rules move the cost of expensive rate() and sum by(le) computations from query time to write time, so dashboards and alerts read a pre-stored result instead of scanning raw data on every load. ClickHouse solves the same problem with materialized views.
+
+→ Steps are documented in [experiments/08-recording-rules/app.py](experiments/08-recording-rules/app.py)
+
+---
+
+## Experiment 09 — Alertmanager
+
+Completes the observability stack with real alerting: from metric threshold breach through Prometheus alert rules to Alertmanager routing and notification.
+
+→ Steps are documented in [experiments/09-alertmanager/app.py](experiments/09-alertmanager/app.py)
+
+---
+
+## Experiment 10 — OTTL Transformations
+
+Uses the OpenTelemetry Transformation Language inside the Collector to drop, rename, enrich, and scrub telemetry data before it reaches the backend.
+
+**Findings:**
+
+OTTL requires a specific context for each transformation block to access different levels of the telemetry model. The primary contexts are:
+
+- `resource`: Global attributes (e.g., host.name, service.version).
+- `metric`: Metadata about the metric itself (e.g., name, unit, description).
+- `datapoint`: The specific observation value and its labels (e.g., value, status_code, le).
+- `scope`: Information about the instrumentation library (e.g., otel.library.name).
+
+→ Steps are documented in [experiments/10-ottl-transformations/app.py](experiments/10-ottl-transformations/app.py)
