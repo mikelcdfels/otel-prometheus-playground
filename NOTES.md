@@ -171,3 +171,38 @@ OTTL requires a specific context for each transformation block to access differe
 - `scope`: Information about the instrumentation library (e.g., otel.library.name).
 
 → Steps are documented in [experiments/10-ottl-transformations/app.py](experiments/10-ottl-transformations/app.py)
+
+---
+
+## Experiment A — Spam Rules in Action
+
+Dash0 automates rule generation (writing the internal OTTL logic) but not noise detection.
+Users must manually identify high-volume, low-value endpoints (e.g., /health) in the Explorer, apply a filter, and then promote it to a Spam Rule.
+
+Additionally, these SPM filters are managed and visible directly within each specific Dataset configuration.
+
+→ Steps are documented in [experiments/dash0/experiment-A-sift/app.py](experiments/dash0/experiment-A-sift/app.py)
+
+---
+
+## Experiment B — Cardinality in Dash0
+
+The Treemap chart is a lifesaver: it uses big boxes for "heavy" metrics and small ones for the rest. If a box is huge, you know it's high-cardinality bloat. You just click it, find the noisy attribute, and add it to Spam Filters right there. It's the fastest way to clean up your data without digging through logs.
+
+→ Steps are documented in [experiments/dash0/experiment-B-cardinality/app.py](experiments/dash0/experiment-B-cardinality/app.py)
+
+---
+
+## Experiment C — Triage on a Real Anomaly
+
+The Triage view inside the Tracing Explorer is more than just an incident list; it's a powerful shortcut for analysis. Instead of manually writing complex filters to find failed spans, Triage automatically groups related errors. With one click, it applies the necessary filters to isolate the spans involved in the incident (like the DB timeout), letting you jump straight from "something is wrong" to "here is exactly why" without fighting the UI.
+
+→ Steps are documented in [experiments/dash0/experiment-C-triage/app.py](experiments/dash0/experiment-C-triage/app.py)
+
+---
+
+## Experiment D — Histograms: Dash0
+
+Dash0 provides full native support for OTLP Exponential Histograms out-of-the-box. Unlike other tools that require complex configuration or data conversion, Dash0's Metric Explorer automatically detects and unfolds these histograms.
+
+→ Steps are documented in [experiments/dash0/experiment-D-histograms/app.py](experiments/dash0/experiment-D-histograms/app.py)
