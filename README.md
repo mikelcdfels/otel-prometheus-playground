@@ -25,7 +25,7 @@ python3 experiments/01-metric-types/app.py
 | 08 | Recording Rules | ✅ Done | Moves expensive `rate()`+`sum by(le)` cost from query time to write time |
 | 09 | Alertmanager | ✅ Done | Full PENDING → FIRING → RESOLVED lifecycle; inhibition prevents duplicate alert fatigue |
 | 10 | OTTL Transformations | ✅ Done | OTTL contexts: `resource`, `metric`, `datapoint`, `scope` — each accesses a different model level |
-| A | Dash0 — SIFT | ⏳ Pending | Does SIFT auto-detect `/health` noise proactively or reactively? |
+| A | Dash0 — Spam Rules | ✅ Done | Dash0 automates rule generation but not noise detection — users must manually identify high-volume endpoints and promote filters to Spam Rules |
 | B | Dash0 — Cardinality | ⏳ Pending | Does Dash0 warn before cardinality explodes? Cost dashboard comparison |
 | C | Dash0 — Triage | ⏳ Pending | How long from DB timeout anomaly to root cause with Triage? |
 | D | Dash0 — Histograms | ⏳ Pending | Does Dash0 store Exponential Histograms natively in ClickHouse? |

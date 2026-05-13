@@ -1,9 +1,10 @@
 """
-Experiment A — SIFT in Action
+Experiment A — Spam Rules in Action
 
 Purpose:
-  Observe whether Dash0's SIFT framework automatically detects /health, /ping,
-  and /healthz as noise and suggests filtering them as spam.
+  Test Dash0's Spam Rules feature by generating 75% health-check noise traffic.
+  Users manually identify high-volume, low-value endpoints in the Explorer,
+  apply a filter, and promote it to a Spam Rule.
 
   75% of all events are low-value health-check requests. The remaining 25% are
   real API traffic. This ratio is common in microservice environments where
@@ -11,15 +12,15 @@ Purpose:
 
 What to look for in the Dash0 UI:
   - Cost dashboard: what % of ingested events come from health endpoints?
-  - SIFT spam detection: does Dash0 proactively suggest a filter?
-  - Metrics Explorer: compare request rate on /health vs /api/* endpoints
+  - Metrics Explorer: identify /health, /ping, /healthz as high-volume endpoints
+  - Dataset config: apply a filter and promote it to a Spam Rule
 
 Expected outcome:
   ~75% of ingested events attributed to /health, /ping, /healthz.
-  Dash0 SIFT may surface these as low-signal, high-volume candidates for filtering.
+  After creating a Spam Rule, those events should be dropped at ingestion.
 
 Prerequisites:
-  export DASH0_ENDPOINT="https://ingress.eu-west-1.aws.dash0.com:4317"
+  export DASH0_ENDPOINT="ingress.europe-west4.gcp.dash0.com:4317"
   export DASH0_TOKEN="your_token_here"
 
 Run:
@@ -40,13 +41,13 @@ TOKEN    = os.environ["DASH0_TOKEN"]
 
 exporter = OTLPMetricExporter(
     endpoint=ENDPOINT,
-    headers={"Authorization": f"Bearer {TOKEN}"},
+    headers={"authorization": f"Bearer {TOKEN}"},
     insecure=False,
 )
 reader   = PeriodicExportingMetricReader(exporter, export_interval_millis=5000)
 provider = MeterProvider(metric_readers=[reader])
 metrics.set_meter_provider(provider)
-meter = metrics.get_meter("dash0.experiment.sift", version="1.0.0")
+meter = metrics.get_meter("dash0.experiment.spam-rules", version="1.0.0")
 
 request_counter = meter.create_counter(
     name="http.requests",
@@ -76,7 +77,7 @@ def is_health(endpoint: str) -> bool:
 
 
 print(f"Sending to Dash0 at {ENDPOINT}")
-print("75% of events are health-check noise — watching for SIFT detection...")
+print("75% of events are health-check noise — use Explorer to create a Spam Rule...")
 print()
 
 while True:
