@@ -100,7 +100,6 @@ while True:
     phase   = current_phase(elapsed)
 
     # Print phase transition banners
-    global _last_phase
     if phase != _last_phase:
         if phase == "normal":
             print("=== PHASE 1: NORMAL — baseline traffic ===")

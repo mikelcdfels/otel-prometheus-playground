@@ -1,27 +1,11 @@
 # Experiment C — Triage on a Real Anomaly
 
-## Timeline
-- Phase 1 start: [HH:MM]
-- Phase 2 start: [HH:MM]
-- Phase 3 start: [HH:MM]
+## Objective
 
-## Detection
-- Time from Phase 2 start to first Dash0 alert: [X] seconds
-- Alert type: UI notification / email / none
+  Simulate a production incident (DB timeout causing cascading failures) and
+  measure how long it takes Dash0 Triage to detect the anomaly and surface the
+  root cause from correlated metrics and traces.
 
-## Triage
-- Did Triage identify DatabaseTimeout as root cause? yes/no
-- Did Triage surface db.system=postgresql? yes/no
-- Time from alert to root cause identified: [X] seconds
+## Dash0 UI Observations
 
-## MTTR comparison
-- With Triage: [X] seconds total
-- Estimated manual investigation: [X] minutes
-
-## Finding
-[2-3 sentences]
-
-## Open question for Michele
-Does Triage use exemplar trace_ids to jump directly to causative traces,
-or does it use timestamp-based correlation?
-
+The Triage view inside the Tracing Explorer is more than just an incident list; it’s a powerful shortcut for analysis. Instead of manually writing complex filters to find failed spans, Triage automatically groups related errors. With one click, it applies the necessary filters to isolate the spans involved in the incident (like the DB timeout), letting you jump straight from "something is wrong" to "here is exactly why" without fighting the UI
