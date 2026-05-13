@@ -40,14 +40,14 @@ import time
 import random
 
 from opentelemetry import metrics
-from opentelemetry.sdk.metrics import MeterProvider, views
+from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.metrics.view import (
+    View,
     ExplicitBucketHistogramAggregation,
     ExponentialBucketHistogramAggregation,
 )
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
-from opentelemetry.sdk.metrics._internal.export import MetricReader
 
 try:
     from opentelemetry.exporter.prometheus import PrometheusMetricReader
@@ -83,15 +83,15 @@ BAD_BUCKETS = [0.1, 1.0, 10.0]
 provider = MeterProvider(
     metric_readers=readers,
     views=[
-        views.View(
+        View(
             instrument_name="http.duration.explicit.good",
             aggregation=ExplicitBucketHistogramAggregation(boundaries=GOOD_BUCKETS),
         ),
-        views.View(
+        View(
             instrument_name="http.duration.explicit.bad",
             aggregation=ExplicitBucketHistogramAggregation(boundaries=BAD_BUCKETS),
         ),
-        views.View(
+        View(
             instrument_name="http.duration.exponential",
             aggregation=ExponentialBucketHistogramAggregation(max_size=160),
         ),
