@@ -40,7 +40,7 @@ from opentelemetry.trace import StatusCode
 
 ENDPOINT = os.environ["DASH0_ENDPOINT"]
 TOKEN    = os.environ["DASH0_TOKEN"]
-HEADERS  = {"Authorization": f"Bearer {TOKEN}"}
+HEADERS  = {"authorization": f"Bearer {TOKEN}"}
 
 # --- Tracing ---
 tracer_provider = TracerProvider()

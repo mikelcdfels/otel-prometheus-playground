@@ -64,7 +64,7 @@ TOKEN    = os.environ["DASH0_TOKEN"]
 
 otlp_exporter = OTLPMetricExporter(
     endpoint=ENDPOINT,
-    headers={"Authorization": f"Bearer {TOKEN}"},
+    headers={"authorization": f"Bearer {TOKEN}"},
     insecure=False,
 )
 otlp_reader = PeriodicExportingMetricReader(otlp_exporter, export_interval_millis=5000)
