@@ -38,7 +38,6 @@ otel-prometheus-playground/
 │
 ├── README.md
 ├── NOTES.md
-├── otel-prometheus-playground.md
 ├── .gitignore
 │
 ├── infrastructure/
