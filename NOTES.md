@@ -149,15 +149,8 @@ Recording rules move the cost of expensive rate() and sum by(le) computations fr
 
 ---
 
-## Experiment 09 — Alertmanager
 
-Completes the observability stack with real alerting: from metric threshold breach through Prometheus alert rules to Alertmanager routing and notification.
-
-→ Steps are documented in [experiments/09-alertmanager/app.py](experiments/09-alertmanager/app.py)
-
----
-
-## Experiment 10 — OTTL Transformations
+## Experiment 09 — OTTL Transformations
 
 Uses the OpenTelemetry Transformation Language inside the Collector to drop, rename, enrich, and scrub telemetry data before it reaches the backend.
 
@@ -170,11 +163,16 @@ OTTL requires a specific context for each transformation block to access differe
 - `datapoint`: The specific observation value and its labels (e.g., value, status_code, le).
 - `scope`: Information about the instrumentation library (e.g., otel.library.name).
 
-→ Steps are documented in [experiments/10-ottl-transformations/app.py](experiments/10-ottl-transformations/app.py)
+→ Steps are documented in [experiments/09-ottl-transformations/app.py](experiments/09-ottl-transformations/app.py)
 
 ---
 
 ## Experiment A — Spam Rules in Action
+
+Test Dash0's Spam Rules feature by generating 75% health-check noise traffic.
+Users manually identify high-volume, low-value endpoints in the Explorer, apply a filter, and promote it to a Spam Rule.
+
+**Findings:**
 
 Dash0 automates rule generation (writing the internal OTTL logic) but not noise detection.
 Users must manually identify high-volume, low-value endpoints (e.g., /health) in the Explorer, apply a filter, and then promote it to a Spam Rule.
@@ -187,6 +185,10 @@ Additionally, these SPM filters are managed and visible directly within each spe
 
 ## Experiment B — Cardinality in Dash0
 
+Observe how Dash0 handles high-cardinality metrics vs Prometheus (Experiment 05).
+
+**Findings:**
+
 The Treemap chart is a lifesaver: it uses big boxes for "heavy" metrics and small ones for the rest. If a box is huge, you know it's high-cardinality bloat. You just click it, find the noisy attribute, and add it to Spam Filters right there. It's the fastest way to clean up your data without digging through logs.
 
 → Steps are documented in [experiments/dash0/experiment-B-cardinality/app.py](experiments/dash0/experiment-B-cardinality/app.py)
@@ -195,6 +197,10 @@ The Treemap chart is a lifesaver: it uses big boxes for "heavy" metrics and smal
 
 ## Experiment C — Triage on a Real Anomaly
 
+ Simulate a production incident (DB timeout causing cascading failures) and measure how long it takes Dash0 Triage to detect the anomaly and surface the root cause from correlated metrics and traces.
+
+**Findings:**
+
 The Triage view inside the Tracing Explorer is more than just an incident list; it's a powerful shortcut for analysis. Instead of manually writing complex filters to find failed spans, Triage automatically groups related errors. With one click, it applies the necessary filters to isolate the spans involved in the incident (like the DB timeout), letting you jump straight from "something is wrong" to "here is exactly why" without fighting the UI.
 
 → Steps are documented in [experiments/dash0/experiment-C-triage/app.py](experiments/dash0/experiment-C-triage/app.py)
@@ -202,6 +208,10 @@ The Triage view inside the Tracing Explorer is more than just an incident list; 
 ---
 
 ## Experiment D — Histograms: Dash0
+
+Experiment with different histograms in Dash0
+
+**Findings:**
 
 Dash0 provides full native support for OTLP Exponential Histograms out-of-the-box. Unlike other tools that require complex configuration or data conversion, Dash0's Metric Explorer automatically detects and unfolds these histograms.
 

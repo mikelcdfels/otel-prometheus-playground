@@ -23,8 +23,7 @@ python3 experiments/01-metric-types/app.py
 | 06 | Multi-Instance | ✅ Done | `sum by(le)` is mandatory before `histogram_quantile()`; Summary quantiles are never aggregatable |
 | 07 | Exemplars | ✅ Done | Requires `enable_open_metrics: true` in Collector and `application/openmetrics-text` header |
 | 08 | Recording Rules | ✅ Done | Moves expensive `rate()`+`sum by(le)` cost from query time to write time |
-| 09 | Alertmanager | ✅ Done | Full PENDING → FIRING → RESOLVED lifecycle; inhibition prevents duplicate alert fatigue |
-| 10 | OTTL Transformations | ✅ Done | OTTL contexts: `resource`, `metric`, `datapoint`, `scope` — each accesses a different model level |
+| 09 | OTTL Transformations | ✅ Done | OTTL contexts: `resource`, `metric`, `datapoint`, `scope` — each accesses a different model level |
 | A | Dash0 — Spam Rules | ✅ Done | Dash0 automates rule generation but not noise detection — users must manually identify high-volume endpoints and promote filters to Spam Rules |
 | B | Dash0 — Cardinality | ⏳ Pending | Does Dash0 warn before cardinality explodes? Cost dashboard comparison |
 | C | Dash0 — Triage | ⏳ Pending | How long from DB timeout anomaly to root cause with Triage? |
@@ -74,10 +73,7 @@ otel-prometheus-playground/
 │   ├── 08-recording-rules/
 │   │   ├── app.py
 │   │   └── FINDINGS.md
-│   ├── 09-alertmanager/
-│   │   ├── app.py
-│   │   └── FINDINGS.md
-│   ├── 10-ottl-transformations/
+│   ├── 09-ottl-transformations/
 │   │   ├── app.py
 │   │   └── FINDINGS.md
 │   └── dash0/
